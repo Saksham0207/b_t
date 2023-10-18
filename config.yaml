@@ -1,0 +1,28 @@
+service: "service:svc"
+description: "file: ./README.md"
+labels:
+  owner: bentoml-team
+  stage: demo
+include:
+- "*.wav"
+- "*.mp3"
+- "*.py"
+- "config.yaml"
+- "README.md"
+- "requirements.txt"
+- "setup.sh"
+exclude:
+- "examples/"
+- "scripts/"
+
+python:
+  requirements_txt: "./requirements.txt"
+docker:
+    distro: ubuntu
+    cuda_version: "11.8.0"
+    system_packages:
+      - git
+      - ffmpeg
+      - libsm6
+      - libxext6
+    setup_script: ".setup.sh"
