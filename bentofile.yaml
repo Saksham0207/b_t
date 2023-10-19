@@ -10,7 +10,7 @@ include:
 - "config.yaml"
 - "README.md"
 - "requirements.txt"
-- "setup.sh"
+- "*.json"
 exclude:
 - "examples/"
 
