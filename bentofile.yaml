@@ -1,7 +1,7 @@
 service: "service:svc"
 description: "file: ./README.md"
 labels:
-  owner: bentoml-team
+  owner: saksham
   stage: demo
 include:
 - "*.wav"
@@ -20,6 +20,7 @@ python:
 docker:
     distro: debian
     cuda_version: "11.8.0"
+    # dockerfile_template: ./Dockerfile.template
     system_packages:
       - git
       - ffmpeg
