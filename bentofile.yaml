@@ -14,8 +14,6 @@ include:
 exclude:
 - "examples/"
 
-python:
-  requirements_txt: "./requirements.txt"
 docker:
     distro: debian
     cuda_version: "11.8.0"
@@ -25,4 +23,5 @@ docker:
       - ffmpeg
       - libsm6
       - libxext6
-    setup_script: "setup.sh"
+python:
+  requirements_txt: "./requirements.txt"
