@@ -13,7 +13,6 @@ include:
 - "setup.sh"
 exclude:
 - "examples/"
-- "scripts/"
 
 python:
   requirements_txt: "./requirements.txt"
