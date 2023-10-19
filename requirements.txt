@@ -1,4 +1,4 @@
-# --index-url https://download.pytorch.org/whl/cu118
+--index-url https://download.pytorch.org/whl/cu118
 
 tqdm
 rotary_embedding_torch
@@ -13,8 +13,8 @@ librosa==0.9.1
 ffmpeg
 numpy
 numba
-# torch==2.0.1+cu118
-# torchaudio==2.0.2
+torch==2.0.1+cu118
+torchaudio==2.0.2
 threadpoolctl
 llvmlite
 appdirs
