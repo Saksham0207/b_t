@@ -1,6 +1,4 @@
-import bentoml
-
-class TextToSpeech(bentoml.Runnable):
+class TextToSpeech():
     """
     Main entry point into Tortoise.
     """
@@ -13,6 +11,7 @@ class TextToSpeech(bentoml.Runnable):
         Constructor
         """
 
+        
         from tortoise.ar_prep.model import AR
         from tortoise.diffusion_prep.model import Diffusion
         from tortoise.vocoder_prep.model import Vocoder
@@ -25,7 +24,6 @@ class TextToSpeech(bentoml.Runnable):
 
         
     #This uses the given settings to generate the audio
-    @bentoml.Runnable.method(batchable=False, batch_dim=0)
     def tts_with_preset(self, inputs):
         """
         Calls TTS with one of a set of preset generation parameters. Options:
@@ -39,19 +37,18 @@ class TextToSpeech(bentoml.Runnable):
             mel = self.diffusion(diff_conds, best_results, best_latents)
             wav = self.vocoder(mel).cpu()
             wav = self.aligner(wav, text)
-            return wav.numpy()
+            return wav
 
-tortoise_runner =  bentoml.Runner(TextToSpeech)
-svc = bentoml.Service("tortoise_tts", runners=[tortoise_runner])
+tortoise_runner = TextToSpeech()
+def main(inputs):
+    gen = tortoise_runner.tts_with_preset(inputs)
+    print(type(gen), gen.device)
+    return gen
 
-
-@svc.api(input=bentoml.io.Text(), output=bentoml.io.NumpyNdarray())
-async def main(inputs):
-    return await tortoise_runner.tts_with_preset.async_run(inputs)
-    
 if __name__ == "__main__":
+    import torchaudio
     text = "Joining two modalities results in a surprising increase in generalization!"
     voice = "pat"
     inp = text + "====" + voice
     gen = main(inp)
-    
+    torchaudio.save('genas.wav', gen.squeeze(0), 24000)

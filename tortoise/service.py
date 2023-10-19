@@ -45,12 +45,11 @@ class TextToSpeech(bentoml.Runnable):
             wav = self.aligner(wav, text)
             return wav
 
-# tortoise_runner = TextToSpeech()
 tortoise_runner =  bentoml.Runner(TextToSpeech)
 svc = bentoml.Service("tortoise_tts", runners=[tortoise_runner])
 
 
-@svc.api(input=bentoml.io.Text(), output=bentoml.io.Text())
+@svc.api(input=bentoml.io.Text(), output=bentoml.io.NumpyNdarray())
 async def main(inputs):
     gen = await tortoise_runner.tts_with_preset.async_run(inputs)
     return gen
@@ -61,5 +60,5 @@ if __name__ == "__main__":
     parser.add_argument("--voice", type=str, default="pat")
     args = parser.parse_args()
     inp = args.text + "====" + args.voice
-    gen = asyncio.run(main(inp))
+    gen = main(inp)
     
