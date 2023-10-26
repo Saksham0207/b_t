@@ -1,4 +1,5 @@
 import argparse
+import torch
 import bentoml
 
 class AR(bentoml.Runnable):
@@ -47,9 +48,10 @@ svc = bentoml.Service("tortoise_tts", runners=[ar_runner, diff_runner])
 async def main(inputs):
     # gen = await tortoise_runner.tts_with_preset.async_run(inputs)
     text, voice = inputs.split("====")
-    diff_conds, best_results, best_latents = await ar_runner.infer.async_run(text, voice)
-    wav = await diff_runner.infer.async_run(diff_conds, best_results, best_latents, text)
-    return wav
+    with torch.no_grad():
+        diff_conds, best_results, best_latents = await ar_runner.infer.async_run(text, voice)
+        wav = await diff_runner.infer.async_run(diff_conds, best_results, best_latents, text)
+        return wav
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
