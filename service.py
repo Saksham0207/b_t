@@ -43,7 +43,7 @@ diff_runner = bentoml.Runner(Diffusion)
 svc = bentoml.Service("tortoise_tts", runners=[ar_runner, diff_runner])
 
 
-@svc.api(input=bentoml.io.Text(), output=bentoml.io.Text())
+@svc.api(input=bentoml.io.Text(), output=bentoml.io.NumpyNdarray())
 async def main(inputs):
     text, voice = inputs.split("====")
     diff_conds, best_results, best_latents = await ar_runner.infer.async_run(text, voice)
