@@ -2,7 +2,7 @@ service: "service:svc"
 description: "file: ./README.md"
 labels:
   owner: saksham
-  stage: demo
+  stage: deployment
 include:
 - "*.wav"
 - "*.mp3"
@@ -11,17 +11,23 @@ include:
 - "README.md"
 - "requirements.txt"
 - "*.json"
+- "*.pth"
+- "*.txt"
 exclude:
 - "examples/"
 
 docker:
     distro: debian
     cuda_version: "11.8.0"
-    dockerfile_template: ./Dockerfile.template
+    # dockerfile_template: ./Dockerfile.template
     system_packages:
       - git
       - ffmpeg
       - libsm6
       - libxext6
 python:
+  packages:
+  - "torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118"
+  - "torchvision==0.15.2 --index-url https://download.pytorch.org/whl/cu118"
+  - "torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118"
   requirements_txt: "./requirements.txt"
