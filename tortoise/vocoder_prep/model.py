@@ -3,7 +3,6 @@ from urllib import request
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import progressbar
 
 from tortoise.vocoder_prep.vocoder import UnivNetGenerator
