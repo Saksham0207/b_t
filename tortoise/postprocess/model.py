@@ -1,6 +1,4 @@
 import torch
-import torchaudio
-import torch.nn as nn
 from tortoise.postprocess.wav2vec_alignment import Wav2VecAlignment
 
 class Postprocess(nn.Module):
@@ -9,4 +7,5 @@ class Postprocess(nn.Module):
         self.aligner = Wav2VecAlignment()
 
     def forward(self, clip, text):
-        return self.aligner.redact(clip.squeeze(1), text).unsqueeze(1)
+        with torch.no_grad():
+            return self.aligner.redact(clip.squeeze(1), text).unsqueeze(1)

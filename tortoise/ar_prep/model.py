@@ -210,26 +210,27 @@ class AR(nn.Module):
             diffusion_conds.append(cond_mel)
         diffusion_conds = torch.stack(diffusion_conds, dim=1)
         
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=True):
-            codes = self.autoregressive.inference_speech(auto_latent, text_tokens,
-                                                                  do_sample=True,
-                                                                  top_p=0.05,
-                                                                  temperature=.3,
-                                                                  num_return_sequences=1,
-                                                                  length_penalty=-5.0,
-                                                                  repetition_penalty=5.0,
-                                                                  max_generate_length=max_mel_tokens)
-            padding_needed = max_mel_tokens - codes.shape[1]
-            codes = F.pad(codes, (0, padding_needed),
-                          value=self.autoregressive.stop_mel_token)
-            for i in range(codes.shape[0]):
-                codes[i] = fix_autoregressive_output(codes[i],
-                                                     self.autoregressive.stop_mel_token)
+        with torch.no_grad():
+            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=True):
+                codes = self.autoregressive.inference_speech(auto_latent, text_tokens,
+                                                                    do_sample=True,
+                                                                    top_p=0.05,
+                                                                    temperature=.3,
+                                                                    num_return_sequences=1,
+                                                                    length_penalty=-5.0,
+                                                                    repetition_penalty=5.0,
+                                                                    max_generate_length=max_mel_tokens)
+                padding_needed = max_mel_tokens - codes.shape[1]
+                codes = F.pad(codes, (0, padding_needed),
+                            value=self.autoregressive.stop_mel_token)
+                for i in range(codes.shape[0]):
+                    codes[i] = fix_autoregressive_output(codes[i],
+                                                        self.autoregressive.stop_mel_token)
 
-            best_latents = self.autoregressive(auto_latent.repeat(1, 1), text_tokens.repeat(1, 1),
-                                                      torch.tensor([text_tokens.shape[-1]], device=text_tokens.device), codes,
-                                                      torch.tensor([codes.shape[-1]*self.autoregressive.mel_length_compression], device=text_tokens.device),
-                                                      return_latent=True, clip_inputs=False)
+                best_latents = self.autoregressive(auto_latent.repeat(1, 1), text_tokens.repeat(1, 1),
+                                                        torch.tensor([text_tokens.shape[-1]], device=text_tokens.device), codes,
+                                                        torch.tensor([codes.shape[-1]*self.autoregressive.mel_length_compression], device=text_tokens.device),
+                                                        return_latent=True, clip_inputs=False)
         return diffusion_conds, codes, best_latents
 
 if __name__ == "__main__":

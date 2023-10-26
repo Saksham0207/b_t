@@ -1,9 +1,7 @@
 import os
-import random
 from urllib import request
 
 import torch
-import torchaudio
 import torch.nn as nn
 import torch.nn.functional as F
 import progressbar
@@ -77,7 +75,8 @@ class Vocoder(nn.Module):
         zero = torch.full((c.shape[0], self.vocoder.mel_channel, 10), -11.5129).to(c.device)
         mel = torch.cat((c, zero), dim=2)
         z = torch.randn(c.shape[0], self.vocoder.noise_dim, mel.size(2)).to(mel.device)
-        audio = self.vocoder(mel, z)
-        audio = audio[:, :, :-(self.vocoder.hop_length * 10)]
-        audio = audio.clamp(min=-1, max=1)
-        return audio
+        with torch.no_grad():
+            audio = self.vocoder(mel, z)
+            audio = audio[:, :, :-(self.vocoder.hop_length * 10)]
+            audio = audio.clamp(min=-1, max=1)
+            return audio
