@@ -20,5 +20,6 @@ deepspeed==0.8.3
 py-cpuinfo
 hjson
 psutil
+boto3:
 bentoml>=1.0.22
 
