@@ -15,7 +15,7 @@ BUILTIN_VOICES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '
 
 aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-bucket_name = "tortoise-tts"
+bucket_name = "tortoise-test"
 session = boto3.Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 s3 = session.client('s3')
 
