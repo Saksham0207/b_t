@@ -24,5 +24,6 @@ docker:
       - ffmpeg
       - libsm6
       - libxext6
+    dockerfile_template: ./Dockerfile.template
 python:
   requirements_txt: "./requirements.txt"
