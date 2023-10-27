@@ -6,13 +6,18 @@ import torch
 import torchaudio
 import numpy as np
 from scipy.io.wavfile import read
+import boto3
 
 from tortoise.ar_prep.stft import STFT
-# from stft import STFT
 
 
 BUILTIN_VOICES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../voices')
 
+aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+bucket_name = "tortoise-tts"
+session = boto3.Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+s3 = session.client('s3')
 
 def load_wav_to_torch(full_path):
     sampling_rate, data = read(full_path)
@@ -101,17 +106,25 @@ def get_voices(extra_voice_dirs=[]):
 def load_voice(voice, extra_voice_dirs=[]):
     if voice == 'random':
         return None, None
+    files = s3.list_objects(Bucket=bucket_name, Prefix=f"voices/{voice}/")["Content"]
 
-    voices = get_voices(extra_voice_dirs)
-    paths = voices[voice]
-    if len(paths) == 1 and paths[0].endswith('.pth'):
-        return None, torch.load(paths[0])
-    else:
-        conds = []
-        for cond_path in paths:
-            c = load_audio(cond_path, 22050)
-            conds.append(c)
-        return conds, None
+    # voices = get_voices(extra_voice_dirs)
+    # paths = voices[voice]
+    # files
+    # paths = s3.get_object(Bucket=bucket_name, Key="voices")
+    # if len(paths) == 1 and paths[0].endswith('.pth'):
+    #     return None, torch.load(paths[0])
+    # else:
+    conds = []
+    # for cond_path in paths:
+    #     c = load_audio(cond_path, 22050)
+    #     conds.append(c)
+    for content in files:
+        c = np.frombuffer(s3.get_object(Bucket=bucket_name,
+                                         Key=content["Keys"])["Body"].read(),
+                                         dtype=np.int16)
+        conds.append(c)
+    return conds, None
 
 
 def load_voices(voices, extra_voice_dirs=[]):
