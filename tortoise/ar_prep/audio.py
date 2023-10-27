@@ -106,7 +106,7 @@ def get_voices(extra_voice_dirs=[]):
 def load_voice(voice, extra_voice_dirs=[]):
     if voice == 'random':
         return None, None
-    files = s3.list_objects(Bucket=bucket_name, Prefix=f"voices/{voice}/")["Content"]
+    files = s3.list_objects(Bucket=bucket_name, Prefix=f"voices/{voice}/")["Contents"]
 
     # voices = get_voices(extra_voice_dirs)
     # paths = voices[voice]
@@ -120,10 +120,28 @@ def load_voice(voice, extra_voice_dirs=[]):
     #     c = load_audio(cond_path, 22050)
     #     conds.append(c)
     for content in files:
-        c = np.frombuffer(s3.get_object(Bucket=bucket_name,
-                                         Key=content["Keys"])["Body"].read(),
+        cond = np.frombuffer(s3.get_object(Bucket=bucket_name,
+                                         Key=content["Key"])["Body"].read(),
                                          dtype=np.int16)
-        conds.append(c)
+        if cond.dtype == np.int32:
+            norm_fix = 2 ** 31
+        elif cond.dtype == np.int16:
+            norm_fix = 2 ** 15
+        elif cond.dtype == np.float16 or cond.dtype == np.float32:
+            norm_fix = 1.
+        else:
+            raise NotImplemented(f"Provided cond dtype not supported: {cond.dtype}")
+        audio, lsr = torch.FloatTensor(cond.astype(np.float32)) / norm_fix, 22050
+        if len(audio.shape) > 1:
+            if audio.shape[0] < 5:
+                audio = audio[0]
+            else:
+                assert audio.shape[1] < 5
+                audio = audio[:, 0]
+        if torch.any(audio > 2) or not torch.any(audio < 0):
+            print(f"Error with {voice}. Max={audio.max()} min={audio.min()}")
+        audio.clip_(-1, 1)
+        conds.append(audio.unsqueeze(0))
     return conds, None
 
 
